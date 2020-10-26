@@ -1,2 +1,2 @@
-# fuelsimulator
-Basic Fluel Simulator with VueJs
+# Fuel Simulator
+Basic Fluel Simulator with VueJs 
