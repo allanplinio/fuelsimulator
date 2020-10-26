@@ -1,0 +1,201 @@
+<head>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="https://rawgit.com/vuejs-tips/v-money/master/dist/v-money.js"></script>
+</head>
+<div id="app">
+    <h3 class="title">Calcule a sua economia </h3>
+    <h4 class="title">Qual combustível que você utiliza atualmente?</h4>
+
+    <form method="post">
+        <div class="line">
+            <div class="total">
+				<div class="form-group">
+					<div class="custom-control custom-radio custom-control-inline">
+					  <input type="radio" id="customRadioInline1" name="tp_combustivel" class="custom-control-input">
+					  <label class="custom-control-label" for="customRadioInline1">Gasolina</label>
+					</div>
+					<div class="custom-control custom-radio custom-control-inline">
+					  <input type="radio" id="customRadioInline2" name="tp_combustivel" class="custom-control-input">
+					  <label class="custom-control-label" for="customRadioInline2">Etanol</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Informe o preço pago por litro:</label>
+					<input class="form-control" name="valorLitroCombustivel" v-model="valorLitroCombustivel" v-money="money">
+				</div>
+				
+				<div class="form-group">
+					<label>Informe o rendimentoCombustivel médio de seu veículo (km/L):</label>
+					<input class="form-control" id="rendimentoCombustivel" name="rendimentoCombustivel" v-model="rendimentoCombustivel" v-money="money">
+				</div>
+				
+				<div class="form-group">
+					<label>Informe a média de Km rodados por dia:</label>
+					<input type="number" class="form-control" id="kmRodado" name="kmRodado" v-model="kmRodado">
+				</div>
+				
+				<div class="form-group">
+					<label>Informe o Preço por m³ de Gás Natural:</label>
+					<input class="form-control" name="valorGNV" id="valorGNV" v-model="valorGNV" v-money="money">
+				</div>				
+			
+                <div class="form-group">
+					<button v-on:click="calcularValor" type="button" class="btn btn-warning" style="background-color:#2c3570; color:#FFF">Calcular</button>
+                </div>	
+				<div v-if="mensagem != ''" class="alert alert-warning" role="alert">
+				  {{mensagem}}
+				</div>
+            </div>
+        </div>
+    </form>
+	<div v-if="listarSimulacao" class="form-row" style="margin-top: 70px">
+		<div class="col-md-12">
+			<h4>Sua simulação</h4>
+			<p>Preço por m³ de Gás Natural: R$ {{valorGNV | toMoney }}</p>
+		</div>
+		<div class="col-md-8">
+			<table class="table table-striped">
+			  <thead>
+				<tr>
+				  <th scope="col"></th>
+				  <th >GASOLINA</th>
+				  <th scope="col">GNV</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr>
+				  <th scope="row">rendimentoCombustivel</th>
+				  <td>{{rendimentoCombustivel}}km/L</td>
+				  <td>{{rendimentoGNV}}km/m³</td>
+				</tr>
+				<tr>
+				  <th scope="row">Preço</th>
+				  <td>{{valorLitroCombustivel}}/L</td>
+				  <td>{{valorGNV}}/m³</td>
+				</tr>
+				<tr>
+				  <th scope="row">Preço p/ perc. {{kmRodado}}km por dia</th>
+				  <td>{{valorCalculoPorDiaCombustivel | toMoney}}</td>
+				  <td>{{valorCalculoPorDiaGNV | toMoney}}</td>
+				</tr>
+				<tr>
+				  <th scope="row">Preço p/ perc. 720km por mês</th>
+				  <td>{{valorTotalMesCombustivel | toMoney}}</td>
+				  <td>{{valorTotalMesGNV | toMoney}}</td>
+				</tr>
+			  </tbody>
+			</table>
+		</div>
+		<div class="col-md-4">
+			<table class="table table-striped">
+			  <thead>
+				<tr>
+				  <th colspan="2" style="text-align: center;">SUA ECONOMIA COM GNV</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr>
+				  <th scope="row">Percorrendo 24km por dia:</th>
+				  <td>{{valorEconomiaDiaGNV | toMoney }}/dia</td>
+				</tr>
+				<tr>
+				  <th scope="row">Percorrendo 720km por mês:</th>
+				  <td>{{valorEconomiaMesGNV | toMoney }}/mês</td>
+				</tr>			
+			  </tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<style>
+.title{
+	color: #323876;
+	font-family: "Patua One", Arial, Tahoma, sans-serif;
+	font-weight: 700;
+}
+
+label{
+	font-weight: 700;
+}
+</style>
+
+<script>
+
+var app = new Vue({
+  el: '#app',
+  data: {
+	  mensagem: '',
+	  listarSimulacao:false,
+	  valorLitroCombustivel:'',	  
+	  valorCalculoPorDiaCombustivel:0,
+	  valorCalculoPorDiaGNV:0,
+	  valorTotalMesCombustivel:0,
+	  valorTotalMesGNV:0,
+	  valorGNV: '',
+	  kmRodado: '',	  
+	  rendimentoCombustivel: '',
+	  rendimentoGNV: '12,30',
+	  valorEconomiaDiaGNV:0,
+	  valorEconomiaMesGNV:0,
+	  money: {
+        decimal: ',',
+        thousands: '.',
+        prefix: '',
+        suffix: '',
+        precision: 2,
+        masked: false /* doesn't work with directive */
+      }
+  },  
+  filters: {
+    toMoney(value) {
+       if (typeof value !== "number") {
+        return value;
+		}
+		var formatter = new Intl.NumberFormat('pt', {
+			style: 'currency',
+			currency: 'BRL',
+			minimumFractionDigits: 2
+		});
+		return formatter.format(value);
+    },
+  },
+  methods: {
+	isNumber:function(value){
+		return (typeof value === "number" ||
+           isFinite(value) || 
+           Math.floor(value) === value);
+	},
+	toFloat:function(value){
+		if(this.isNumber(value)) return value;
+		   
+		return value.replace(',', '.');
+	},
+    calcularValor: function () {
+	
+		if(this.valorLitroCombustivel == '' ||
+			this.rendimentoCombustivel	 == '' ||
+			this.kmRodado == '' ||
+			this.valorGNV == ''){
+			this.mensagem = 'Preencha os campos para realizar a simulação!';
+			this.listarSimulacao = false;
+			return;
+		}else{
+			this.mensagem = '';
+		}
+		
+		this.valorCalculoPorDiaCombustivel = (this.toFloat(this.kmRodado)/this.toFloat(this.rendimentoCombustivel)) * this.toFloat(this.valorLitroCombustivel);
+		this.valorCalculoPorDiaGNV = this.toFloat(this.kmRodado) / this.toFloat(this.rendimentoGNV) * this.toFloat(this.valorGNV);
+		this.valorTotalMesCombustivel = this.toFloat(this.valorCalculoPorDiaCombustivel) * 30;
+		this.valorTotalMesGNV = this.toFloat(this.valorCalculoPorDiaGNV) * 30;	 
+	  
+		this.valorEconomiaMesGNV = this.toFloat(this.valorTotalMesCombustivel) - this.toFloat(this.valorTotalMesGNV);
+		this.valorEconomiaDiaGNV = this.toFloat(this.valorEconomiaMesGNV)  / 30;
+		this.listarSimulacao = true;
+	}
+  }
+})
+</script>
+
+ 
